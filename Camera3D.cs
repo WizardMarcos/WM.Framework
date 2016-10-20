@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace WM.Framework.Monogame
 {
-    public class Camera3D
+    public abstract class Camera3D
     {
         // Every variable as a public property assigned to it, which also
         // updates a bool that tells us if we should update our matrices.
@@ -19,7 +19,7 @@ namespace WM.Framework.Monogame
         // These influence the View Matrix.
         #region POSITION
 
-        private Vector3 position;
+        protected Vector3 position;
         public Vector3 Position
         {
             get
@@ -42,7 +42,7 @@ namespace WM.Framework.Monogame
         #region DIRECTION
 
         // The Direction vector is always normalized.
-        private Vector3 direction;
+        protected Vector3 direction;
         public Vector3 Direction
         {
             get
@@ -65,7 +65,7 @@ namespace WM.Framework.Monogame
         #region UP
 
         // The Up vector is always normalized.
-        private Vector3 up;
+        protected Vector3 up;
         public Vector3 Up
         {
             get
@@ -86,57 +86,14 @@ namespace WM.Framework.Monogame
 
         #endregion
 
-        // Field Of View, Aspect Ratio, Near Plane and Far Plane.
+        // Near Plane and Far Plane.
         // These influence the Projection Matrix.
-        #region FOV
-        
-        // The field of view is a float with its values ranging from 0 to pi.
-        private float fov;
-        public float Fov
-        {
-            get
-            {
-                return fov;
-            }
-            set
-            {
-                fov = value;
-                projectionIsDirty = true;
-            }
-        }
-        public void SetFov(float fov)
-        {
-            this.fov = fov;
-            projectionIsDirty = true;
-        }
-
-        #endregion
-        #region ASPECT RATIO
-
-        private float aspectRatio;
-        public float AspectRatio
-        {
-            get
-            {
-                return aspectRatio;
-            }
-            set
-            {
-                aspectRatio = value;
-                projectionIsDirty = true;
-            }
-        }
-        public void SetAspectRatio(float aspectRatio)
-        {
-            this.aspectRatio = aspectRatio;
-            projectionIsDirty = true;
-        }
-
-        #endregion
+        // They are common to all projection matrix creation forms, and so
+        // are included in the base class.
         #region NEAR PLANE
 
         // The Near Plane is the closest distance at which the camera renders.
-        private float nearPlane;
+        protected float nearPlane;
         public float NearPlane
         {
             get
@@ -161,7 +118,7 @@ namespace WM.Framework.Monogame
         // The Far Plane is the farthest distance at which the camera renders.
         // While a very large value may be desirable, it comes at a cost of 
         // performance.
-        private float farPlane;
+        protected float farPlane;
         public float FarPlane
         {
             get
@@ -188,9 +145,8 @@ namespace WM.Framework.Monogame
         // http://rbwhitaker.wikidot.com/monogame-basic-matrices
         #region VIEW MATRIX
 
-        private bool viewIsDirty;
+        protected bool viewIsDirty;
         private Matrix viewMatrix;
-
         public Matrix ViewMatrix
         {
             get
@@ -202,82 +158,16 @@ namespace WM.Framework.Monogame
                 }
                 return viewMatrix;
             }
-            private set
-            {
-                viewMatrix = value;
-                viewIsDirty = false;
-            }
         }
 
         #endregion
         #region PROJECTION MATRIX
 
-        private bool projectionIsDirty;
-        private Matrix projectionMatrix;
-
-        public Matrix ProjectionMatrix
-        {
-            get
-            {
-                if (projectionIsDirty)
-                {
-                    // Unfortunately, this camera only allows perspective projections.
-                    // However, changing this to an ortographic perspective wouldn't be
-                    // too hard, as all methods included in this camera only alter the
-                    // View Matrix.
-                    projectionMatrix = Matrix.CreatePerspectiveFieldOfView(fov, aspectRatio, nearPlane, farPlane);
-                    projectionIsDirty = false;
-                }
-                return projectionMatrix;
-            }
-            private set
-            {
-                projectionMatrix = value;
-                projectionIsDirty = false;
-            }
-        }
+        protected bool projectionIsDirty;
+        protected Matrix projectionMatrix;
+        public abstract Matrix ProjectionMatrix { get; }
 
         #endregion
-
-        /// <summary>
-        /// Creates a <see cref="Camera3D"/> using a perspective view.
-        /// </summary>
-        /// <param name="position">Position of the camera.</param>
-        /// <param name="direction">Direction to where the camera is looking.</param>
-        /// <param name="up">The Up vector.</param>
-        /// <param name="fov">Field of view.</param>
-        /// <param name="aspectRatio">Aspect ratio.</param>
-        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
-        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
-        public Camera3D(Vector3 position, Vector3 direction, Vector3 up,
-            float fov, float aspectRatio, float nearPlane, float farPlane)
-        {
-            this.position = position;
-            this.direction = Vector3.Normalize(direction);
-            this.up = Vector3.Normalize(up);
-            this.fov = fov;
-            this.aspectRatio = aspectRatio;
-            this.nearPlane = nearPlane;
-            this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
-        }
-
-        /// <summary>
-        /// Changes the Projection Matrix.
-        /// </summary>
-        /// <param name="fov">Field of view.</param>
-        /// <param name="aspectRatio">Aspect ratio.</param>
-        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
-        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
-        public void ChangeProjection(float fov, float aspectRatio, float nearPlane, float farPlane)
-        {
-            this.fov = fov;
-            this.aspectRatio = aspectRatio;
-            this.nearPlane = nearPlane;
-            this.farPlane = farPlane;
-            projectionIsDirty = true;
-        }
 
         /// <summary>
         /// Rotates the camera so it points to the target.
@@ -330,7 +220,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Strafes the camera vertically in relation to its direction.
+        /// Strafes the camera vertically along its up vector.
         /// </summary>
         /// <param name="amount">The amount to strafe.</param>
         public void StrafeVertically(float amount)
@@ -501,6 +391,101 @@ namespace WM.Framework.Monogame
 
             Yaw(speedX * centre.X * (float)gameTime.ElapsedGameTime.TotalSeconds);
             Pitch(speedY * centre.Y * (float)gameTime.ElapsedGameTime.TotalSeconds);
+        }
+    }
+
+    public class Camera3DPerspective : Camera3D
+    {
+        // Field Of View and Aspect Ratio.
+        // These influence the Projection Matrix.
+        #region FOV
+
+        // The field of view is a float with its values ranging from 0 to pi.
+        private float fov;
+        public float Fov
+        {
+            get
+            {
+                return fov;
+            }
+            set
+            {
+                fov = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetFov(float fov)
+        {
+            this.fov = fov;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+        #region ASPECT RATIO
+
+        private float aspectRatio;
+        public float AspectRatio
+        {
+            get
+            {
+                return aspectRatio;
+            }
+            set
+            {
+                aspectRatio = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetAspectRatio(float aspectRatio)
+        {
+            this.aspectRatio = aspectRatio;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+
+        #region PROJECTION MATRIX
+
+        // Method to override the creation of the projection matrix.
+        public override Matrix ProjectionMatrix
+        {
+            get
+            {
+                if (projectionIsDirty)
+                {
+                    // This camera creates the projection matrix using the field of view,
+                    // aspect ratio and the near plane and far plane distances.
+                    projectionMatrix = Matrix.CreatePerspectiveFieldOfView(fov, aspectRatio, NearPlane, FarPlane);
+                    projectionIsDirty = false;
+                }
+                return projectionMatrix;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a <see cref="Camera3D"/> using a perspective projection.
+        /// </summary>
+        /// <param name="position">Position of the camera.</param>
+        /// <param name="direction">Direction to where the camera is looking.</param>
+        /// <param name="up">The Up vector.</param>
+        /// <param name="fov">Field of view.</param>
+        /// <param name="aspectRatio">Aspect ratio.</param>
+        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
+        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
+        public Camera3DPerspective(Vector3 position, Vector3 direction, Vector3 up,
+            float fov, float aspectRatio, float nearPlane, float farPlane)
+        {
+            this.position = position;
+            this.direction = Vector3.Normalize(direction);
+            this.up = Vector3.Normalize(up);
+            this.fov = fov;
+            this.aspectRatio = aspectRatio;
+            this.nearPlane = nearPlane;
+            this.farPlane = farPlane;
+            viewIsDirty = true;
+            projectionIsDirty = true;
         }
     }
 }
