@@ -180,6 +180,8 @@ namespace WM.Framework.Monogame
             viewIsDirty = true;
         }
 
+        #region MOVEMENT
+
         /// <summary>
         /// Moves the camera.
         /// </summary>
@@ -234,6 +236,24 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
+        /// Strafes the camera forwards in its direction but perpendicular to the
+        /// up vector.
+        /// </summary>
+        /// <param name="amount">The amount to strafe.</param>
+        public void StrafeForwards(float amount)
+        {
+            // This one is a bit more complex, as we want to find the forward
+            // vector in relation to both the up and direction vectors.
+            // It will be the cross product of the horizontal and up vectors.
+            position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * amount;
+            viewIsDirty = true;
+        }
+
+        #endregion
+
+        #region ROTATION
+
+        /// <summary>
         /// Yaw.
         /// </summary>
         /// <param name="angle">The angle in radians.</param>
@@ -279,6 +299,10 @@ namespace WM.Framework.Monogame
             // To roll, we just need to rotate the up vector around the direction.
             Up = Vector3.Transform(up, Matrix.CreateFromAxisAngle(direction, MathHelper.ToRadians(angle)));
         }
+
+        #endregion
+
+        #region MOUSE AND KEYBOARD CONTROLS
 
         /// <summary>
         /// Basic function to use the mouse to control the camera.
@@ -392,6 +416,8 @@ namespace WM.Framework.Monogame
             Yaw(speedX * centre.X * (float)gameTime.ElapsedGameTime.TotalSeconds);
             Pitch(speedY * centre.Y * (float)gameTime.ElapsedGameTime.TotalSeconds);
         }
+
+        #endregion
     }
 
     public class Camera3DPerspective : Camera3D
@@ -482,6 +508,104 @@ namespace WM.Framework.Monogame
             this.up = Vector3.Normalize(up);
             this.fov = fov;
             this.aspectRatio = aspectRatio;
+            this.nearPlane = nearPlane;
+            this.farPlane = farPlane;
+            viewIsDirty = true;
+            projectionIsDirty = true;
+        }
+    }
+
+    public class Camera3DOrtographic : Camera3D
+    {
+        // Width and Height.
+        // These influence the Projection Matrix.
+        // Unlike perspective projections, ortographic ones do not
+        // have a fov. Since they don't have one, they need values for
+        // the width and height of the projection, which can't be
+        // calculated from an aspect ratio.
+        #region WIDTH
+
+        private float width;
+        public float Width
+        {
+            get
+            {
+                return width;
+            }
+            set
+            {
+                width = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetWidth(float width)
+        {
+            this.width = width;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+        #region HEIGHT
+
+        private float height;
+        public float Height
+        {
+            get
+            {
+                return height;
+            }
+            set
+            {
+                height = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetHeight(float height)
+        {
+            this.height = height;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+
+        #region PROJECTION MATRIX
+
+        // Method to override the creation of the projection matrix.
+        public override Matrix ProjectionMatrix
+        {
+            get
+            {
+                if (projectionIsDirty)
+                {
+                    projectionMatrix = Matrix.CreateOrthographic(width, height, nearPlane, farPlane);
+                    projectionIsDirty = false;
+                }
+                return projectionMatrix;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a <see cref="Camera3D"/> using an ortographic projection.
+        /// </summary>
+        /// <param name="position">Position of the camera.</param>
+        /// <param name="direction">Direction to where the camera is looking.</param>
+        /// <param name="up">The Up vector.</param>
+        /// <param name="width">The width of the projection.</param>
+        /// <param name="height">The height of the projection.</param>
+        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
+        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
+        /// <remarks>Setting the height to X and the width to X * Aspect Ratio will make a
+        /// properly scaled projection matrix.</remarks>
+        public Camera3DOrtographic(Vector3 position, Vector3 direction, Vector3 up,
+            float width, float height, float nearPlane, float farPlane)
+        {
+            this.position = position;
+            this.direction = Vector3.Normalize(direction);
+            this.up = Vector3.Normalize(up);
+            this.width = width;
+            this.height = height;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
             viewIsDirty = true;
