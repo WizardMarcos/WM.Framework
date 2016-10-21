@@ -515,6 +515,173 @@ namespace WM.Framework.Monogame
         }
     }
 
+    public class Camera3DPerspectiveOffCentre : Camera3D
+    {
+        // Left, Right, Bottom and Top.
+        // These influence the Projection Matrix.
+        // They define the area of the projection.
+        #region LEFT
+
+        private float left;
+        public float Left
+        {
+            get
+            {
+                return left;
+            }
+            set
+            {
+                left = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetLeft(float left)
+        {
+            this.left = left;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+        #region RIGHT
+
+        private float right;
+        public float Tight
+        {
+            get
+            {
+                return right;
+            }
+            set
+            {
+                right = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetRight(float right)
+        {
+            this.right = right;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+        #region BOTTOM
+
+        private float bottom;
+        public float Bottom
+        {
+            get
+            {
+                return bottom;
+            }
+            set
+            {
+                bottom = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetBottom(float bottom)
+        {
+            this.bottom = bottom;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+        #region TOP
+
+        private float top;
+        public float Top
+        {
+            get
+            {
+                return top;
+            }
+            set
+            {
+                top = value;
+                projectionIsDirty = true;
+            }
+        }
+        public void SetTop(float top)
+        {
+            this.top = top;
+            projectionIsDirty = true;
+        }
+
+        #endregion
+
+        #region PROJECTION MATRIX
+
+        // Method to override the creation of the projection matrix.
+        public override Matrix ProjectionMatrix
+        {
+            get
+            {
+                if (projectionIsDirty)
+                {
+                    projectionMatrix = Matrix.CreatePerspectiveOffCenter(left, right, bottom, top, nearPlane, farPlane);
+                    projectionIsDirty = false;
+                }
+                return projectionMatrix;
+            }
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Creates a <see cref="Camera3D"/> using a perspective projection, with a free projection area.
+        /// </summary>
+        /// <param name="position">Position of the camera.</param>
+        /// <param name="direction">Direction to where the camera is looking.</param>
+        /// <param name="up">The Up vector.</param>
+        /// <param name="left">Left position.</param>
+        /// <param name="right">Right position.</param>
+        /// <param name="bottom">Bottom position.</param>
+        /// <param name="top">Top position.</param>
+        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
+        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
+        public Camera3DPerspectiveOffCentre(Vector3 position, Vector3 direction, Vector3 up,
+            float left, float right, float bottom, float top, float nearPlane, float farPlane)
+        {
+            this.position = position;
+            this.direction = Vector3.Normalize(direction);
+            this.up = Vector3.Normalize(up);
+            this.left = left;
+            this.right = right;
+            this.bottom = bottom;
+            this.top = top;
+            this.nearPlane = nearPlane;
+            this.farPlane = farPlane;
+            viewIsDirty = true;
+            projectionIsDirty = true;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Camera3D"/> using a perspective projection, with a free centered projection area.
+        /// </summary>
+        /// <param name="position">Position of the camera.</param>
+        /// <param name="direction">Direction to where the camera is looking.</param>
+        /// <param name="up">The Up vector.</param>
+        /// <param name="width">The width of the area.</param>
+        /// <param name="height">The height of the area.</param>
+        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
+        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
+        public Camera3DPerspectiveOffCentre(Vector3 position, Vector3 direction, Vector3 up,
+            float width, float height, float nearPlane, float farPlane)
+        {
+            this.position = position;
+            this.direction = Vector3.Normalize(direction);
+            this.up = Vector3.Normalize(up);
+            this.left = width / -2f;
+            this.right = left + width;
+            this.bottom = height / -2f;
+            this.top = bottom + height;
+            this.nearPlane = nearPlane;
+            this.farPlane = farPlane;
+            viewIsDirty = true;
+            projectionIsDirty = true;
+        }
+    }
+
     public class Camera3DOrtographic : Camera3D
     {
         // Width and Height.
