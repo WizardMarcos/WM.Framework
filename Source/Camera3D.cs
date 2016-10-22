@@ -540,6 +540,12 @@ namespace WM.Framework.Monogame
             fov /= amount;
             projectionIsDirty = true;
         }
+
+        public Camera3DPerspectiveOffCentre ToOffCentrePerspective()
+        {
+            float height = (float)Math.Tan(fov * 0.5f);
+            return new Camera3DPerspectiveOffCentre(position, direction, up, height * aspectRatio, height, nearPlane, farPlane);
+        }
     }
 
     public class Camera3DPerspectiveOffCentre : Camera3D
@@ -717,7 +723,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Creates a <see cref="Camera3D"/> using a perspective projection, with a free centered projection area.
+        /// Creates a <see cref="Camera3D"/> using a perspective projection, with a free centred projection area.
         /// </summary>
         /// <param name="position">Position of the camera.</param>
         /// <param name="direction">Direction to where the camera is looking.</param>
@@ -752,11 +758,11 @@ namespace WM.Framework.Monogame
         }
     }
 
-    public class Camera3DOrtographic : Camera3D
+    public class Camera3DOrthographic : Camera3D
     {
         // Width and Height.
         // These influence the Projection Matrix.
-        // Unlike perspective projections, ortographic ones do not
+        // Unlike perspective projections, orthographic ones do not
         // have a fov. Since they don't have one, they need values for
         // the width and height of the projection, which can't be
         // calculated from an aspect ratio.
@@ -824,7 +830,7 @@ namespace WM.Framework.Monogame
         #endregion
 
         /// <summary>
-        /// Creates a <see cref="Camera3D"/> using an ortographic projection.
+        /// Creates a <see cref="Camera3D"/> using an orthographic projection.
         /// </summary>
         /// <param name="position">Position of the camera.</param>
         /// <param name="direction">Direction to where the camera is looking.</param>
@@ -835,7 +841,7 @@ namespace WM.Framework.Monogame
         /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
         /// <remarks>Setting the height to X and the width to X * Aspect Ratio will make a
         /// properly scaled projection matrix.</remarks>
-        public Camera3DOrtographic(Vector3 position, Vector3 direction, Vector3 up,
+        public Camera3DOrthographic(Vector3 position, Vector3 direction, Vector3 up,
             float width, float height, float nearPlane, float farPlane)
         {
             this.position = position;
@@ -855,9 +861,14 @@ namespace WM.Framework.Monogame
             height /= amount;
             projectionIsDirty = true;
         }
+
+        public Camera3DOrthographicOffCentre ToOrthographicOffCentre()
+        {
+            return new Camera3DOrthographicOffCentre(position, direction, up, width, height, nearPlane, farPlane);
+        }
     }
 
-    public class Camera3DOrtographicOffCentre : Camera3D
+    public class Camera3DOrthographicOffCentre : Camera3D
     {
         // Left, Right, Bottom and Top.
         // These influence the Projection Matrix.
@@ -1003,7 +1014,7 @@ namespace WM.Framework.Monogame
         #endregion
 
         /// <summary>
-        /// Creates a <see cref="Camera3D"/> using an ortographic projection, with a free projection area.
+        /// Creates a <see cref="Camera3D"/> using an orthographic projection, with a free projection area.
         /// </summary>
         /// <param name="position">Position of the camera.</param>
         /// <param name="direction">Direction to where the camera is looking.</param>
@@ -1014,7 +1025,7 @@ namespace WM.Framework.Monogame
         /// <param name="top">Top position.</param>
         /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
         /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
-        public Camera3DOrtographicOffCentre(Vector3 position, Vector3 direction, Vector3 up,
+        public Camera3DOrthographicOffCentre(Vector3 position, Vector3 direction, Vector3 up,
             float left, float right, float bottom, float top, float nearPlane, float farPlane)
         {
             this.position = position;
@@ -1024,6 +1035,32 @@ namespace WM.Framework.Monogame
             this.right = right;
             this.bottom = bottom;
             this.top = top;
+            this.nearPlane = nearPlane;
+            this.farPlane = farPlane;
+            viewIsDirty = true;
+            projectionIsDirty = true;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Camera3D"/> using an orthographic projection, with a free centred projection area.
+        /// </summary>
+        /// <param name="position">Position of the camera.</param>
+        /// <param name="direction">Direction to where the camera is looking.</param>
+        /// <param name="up">The Up vector.</param>
+        /// <param name="width">The width of the area.</param>
+        /// <param name="height">The height of the area.</param>
+        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
+        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
+        public Camera3DOrthographicOffCentre(Vector3 position, Vector3 direction, Vector3 up,
+            float width, float height, float nearPlane, float farPlane)
+        {
+            this.position = position;
+            this.direction = Vector3.Normalize(direction);
+            this.up = Vector3.Normalize(up);
+            this.left = width / -2f;
+            this.right = left + width;
+            this.bottom = height / -2f;
+            this.top = bottom + height;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
             viewIsDirty = true;
