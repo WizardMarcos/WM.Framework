@@ -169,17 +169,6 @@ namespace WM.Framework.Monogame
 
         #endregion
 
-        /// <summary>
-        /// Rotates the camera so it points to the target.
-        /// </summary>
-        /// <param name="target">Where the camera should look at.</param>
-        public void LookAt(Vector3 target)
-        {
-            // The direction is calculated from the target and position.
-            direction = Vector3.Normalize(target - position);
-            viewIsDirty = true;
-        }
-
         #region MOVEMENT
 
         /// <summary>
@@ -246,6 +235,17 @@ namespace WM.Framework.Monogame
             // vector in relation to both the up and direction vectors.
             // It will be the cross product of the horizontal and up vectors.
             position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * amount;
+            viewIsDirty = true;
+        }
+
+        /// <summary>
+        /// Positions the camera so that it is at the specified distance from a <see cref="Vector3"/>.
+        /// </summary>
+        /// <param name="location">The location.</param>
+        /// <param name="distance">The distance from the location.</param>
+        public void Above(Vector3 location, float distance)
+        {
+            position = location + up * distance;
             viewIsDirty = true;
         }
 
@@ -418,6 +418,27 @@ namespace WM.Framework.Monogame
         }
 
         #endregion
+
+        #region OTHER
+
+        /// <summary>
+        /// Zooms the specified amount.
+        /// </summary>
+        /// <param name="amount"></param>
+        public abstract void Zoom(float amount);
+
+        /// <summary>
+        /// Rotates the camera so it points to the target.
+        /// </summary>
+        /// <param name="target">Where the camera should look at.</param>
+        public void LookAt(Vector3 target)
+        {
+            // The direction is calculated from the target and position.
+            direction = Vector3.Normalize(target - position);
+            viewIsDirty = true;
+        }
+
+        #endregion
     }
 
     public class Camera3DPerspective : Camera3D
@@ -512,6 +533,18 @@ namespace WM.Framework.Monogame
             this.farPlane = farPlane;
             viewIsDirty = true;
             projectionIsDirty = true;
+        }
+
+        public override void Zoom(float amount)
+        {
+            fov /= amount;
+            projectionIsDirty = true;
+        }
+
+        public Camera3DPerspectiveOffCentre ToOffCentrePerspective()
+        {
+            float height = (float)Math.Tan(fov * 0.5f);
+            return new Camera3DPerspectiveOffCentre(position, direction, up, height * aspectRatio, height, nearPlane, farPlane);
         }
     }
 
@@ -609,6 +642,40 @@ namespace WM.Framework.Monogame
 
         #endregion
 
+        // These are obtained from the previous variables.
+        #region WIDTH AND HEIGHT
+
+        public float Width
+        {
+            get
+            {
+                return right - left;
+            }
+            set
+            {
+                float f = value / Width;
+                left *= f;
+                right *= f;
+                projectionIsDirty = true;
+            }
+        }
+        public float Height
+        {
+            get
+            {
+                return top - bottom;
+            }
+            set
+            {
+                float f = value / Height;
+                top *= f;
+                bottom *= f;
+                projectionIsDirty = true;
+            }
+        }
+
+        #endregion
+
         #region PROJECTION MATRIX
 
         // Method to override the creation of the projection matrix.
@@ -656,7 +723,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Creates a <see cref="Camera3D"/> using a perspective projection, with a free centered projection area.
+        /// Creates a <see cref="Camera3D"/> using a perspective projection, with a free centred projection area.
         /// </summary>
         /// <param name="position">Position of the camera.</param>
         /// <param name="direction">Direction to where the camera is looking.</param>
@@ -680,13 +747,22 @@ namespace WM.Framework.Monogame
             viewIsDirty = true;
             projectionIsDirty = true;
         }
+
+        public override void Zoom(float amount)
+        {
+            top /= amount;
+            left /= amount;
+            right /= amount;
+            bottom /= amount;
+            projectionIsDirty = true;
+        }
     }
 
-    public class Camera3DOrtographic : Camera3D
+    public class Camera3DOrthographic : Camera3D
     {
         // Width and Height.
         // These influence the Projection Matrix.
-        // Unlike perspective projections, ortographic ones do not
+        // Unlike perspective projections, orthographic ones do not
         // have a fov. Since they don't have one, they need values for
         // the width and height of the projection, which can't be
         // calculated from an aspect ratio.
@@ -754,7 +830,7 @@ namespace WM.Framework.Monogame
         #endregion
 
         /// <summary>
-        /// Creates a <see cref="Camera3D"/> using an ortographic projection.
+        /// Creates a <see cref="Camera3D"/> using an orthographic projection.
         /// </summary>
         /// <param name="position">Position of the camera.</param>
         /// <param name="direction">Direction to where the camera is looking.</param>
@@ -765,7 +841,7 @@ namespace WM.Framework.Monogame
         /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
         /// <remarks>Setting the height to X and the width to X * Aspect Ratio will make a
         /// properly scaled projection matrix.</remarks>
-        public Camera3DOrtographic(Vector3 position, Vector3 direction, Vector3 up,
+        public Camera3DOrthographic(Vector3 position, Vector3 direction, Vector3 up,
             float width, float height, float nearPlane, float farPlane)
         {
             this.position = position;
@@ -778,9 +854,21 @@ namespace WM.Framework.Monogame
             viewIsDirty = true;
             projectionIsDirty = true;
         }
+
+        public override void Zoom(float amount)
+        {
+            width /= amount;
+            height /= amount;
+            projectionIsDirty = true;
+        }
+
+        public Camera3DOrthographicOffCentre ToOrthographicOffCentre()
+        {
+            return new Camera3DOrthographicOffCentre(position, direction, up, width, height, nearPlane, farPlane);
+        }
     }
 
-    public class Camera3DOrtographicOffCentre : Camera3D
+    public class Camera3DOrthographicOffCentre : Camera3D
     {
         // Left, Right, Bottom and Top.
         // These influence the Projection Matrix.
@@ -874,6 +962,39 @@ namespace WM.Framework.Monogame
 
         #endregion
 
+        #region WIDTH AND HEIGHT
+
+        public float Width
+        {
+            get
+            {
+                return right - left;
+            }
+            set
+            {
+                float f = value / Width;
+                left *= f;
+                right *= f;
+                projectionIsDirty = true;
+            }
+        }
+        public float Height
+        {
+            get
+            {
+                return top - bottom;
+            }
+            set
+            {
+                float f = value / Height;
+                top *= f;
+                bottom *= f;
+                projectionIsDirty = true;
+            }
+        }
+
+        #endregion
+
         #region PROJECTION MATRIX
 
         // Method to override the creation of the projection matrix.
@@ -893,7 +1014,7 @@ namespace WM.Framework.Monogame
         #endregion
 
         /// <summary>
-        /// Creates a <see cref="Camera3D"/> using an ortographic projection, with a free projection area.
+        /// Creates a <see cref="Camera3D"/> using an orthographic projection, with a free projection area.
         /// </summary>
         /// <param name="position">Position of the camera.</param>
         /// <param name="direction">Direction to where the camera is looking.</param>
@@ -904,7 +1025,7 @@ namespace WM.Framework.Monogame
         /// <param name="top">Top position.</param>
         /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
         /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
-        public Camera3DOrtographicOffCentre(Vector3 position, Vector3 direction, Vector3 up,
+        public Camera3DOrthographicOffCentre(Vector3 position, Vector3 direction, Vector3 up,
             float left, float right, float bottom, float top, float nearPlane, float farPlane)
         {
             this.position = position;
@@ -917,6 +1038,41 @@ namespace WM.Framework.Monogame
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
             viewIsDirty = true;
+            projectionIsDirty = true;
+        }
+
+        /// <summary>
+        /// Creates a <see cref="Camera3D"/> using an orthographic projection, with a free centred projection area.
+        /// </summary>
+        /// <param name="position">Position of the camera.</param>
+        /// <param name="direction">Direction to where the camera is looking.</param>
+        /// <param name="up">The Up vector.</param>
+        /// <param name="width">The width of the area.</param>
+        /// <param name="height">The height of the area.</param>
+        /// <param name="nearPlane">The closest distance at which objects are rendered.</param>
+        /// <param name="farPlane">The farthest distance at which objects are rendered.</param>
+        public Camera3DOrthographicOffCentre(Vector3 position, Vector3 direction, Vector3 up,
+            float width, float height, float nearPlane, float farPlane)
+        {
+            this.position = position;
+            this.direction = Vector3.Normalize(direction);
+            this.up = Vector3.Normalize(up);
+            this.left = width / -2f;
+            this.right = left + width;
+            this.bottom = height / -2f;
+            this.top = bottom + height;
+            this.nearPlane = nearPlane;
+            this.farPlane = farPlane;
+            viewIsDirty = true;
+            projectionIsDirty = true;
+        }
+
+        public override void Zoom(float amount)
+        {
+            top /= amount;
+            left /= amount;
+            right /= amount;
+            bottom /= amount;
             projectionIsDirty = true;
         }
     }
