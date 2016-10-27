@@ -234,6 +234,8 @@ namespace WM.Framework.Monogame
             // This one is a bit more complex, as we want to find the forward
             // vector in relation to both the up and direction vectors.
             // It will be the cross product of the horizontal and up vectors.
+            // Also, we need to flip the amount, because positive is actually backwards.
+            amount = -amount;
             position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * amount;
             viewIsDirty = true;
         }
@@ -246,6 +248,23 @@ namespace WM.Framework.Monogame
         public void Above(Vector3 location, float distance)
         {
             position = location + up * distance;
+            viewIsDirty = true;
+        }
+
+        /// <summary>
+        /// Follows a target, keeping the camera's up vector.
+        /// </summary>
+        /// <param name="target">The target to look at.</param>
+        /// <param name="targetDirection">The target's direction.</param>
+        /// <param name="relativeCameraDirection">The camera's direction relative to the target.</param>
+        /// <param name="distance">The camera's distance to the target.</param>
+        public void FollowUpright(Vector3 target, Vector3 targetDirection, Vector3 relativeCameraDirection, float distance = 1)
+        {
+            // This was a bit of a pain to write. Still, it works, which is nice.
+            // The camera will keep its up vector, and follow a target around.
+            direction = Vector3.Normalize(-Vector3.TransformNormal(relativeCameraDirection, 
+                Matrix.CreateLookAt(Vector3.Zero, targetDirection, -up)));
+            position = target - direction * distance;
             viewIsDirty = true;
         }
 
@@ -541,6 +560,10 @@ namespace WM.Framework.Monogame
             projectionIsDirty = true;
         }
 
+        /// <summary>
+        /// Converts this <see cref="Camera3DPerspective"/> in a <see cref="Camera3DPerspectiveOffCentre"/>.
+        /// </summary>
+        /// <returns></returns>
         public Camera3DPerspectiveOffCentre ToOffCentrePerspective()
         {
             float height = (float)Math.Tan(fov * 0.5f);
@@ -756,6 +779,53 @@ namespace WM.Framework.Monogame
             bottom /= amount;
             projectionIsDirty = true;
         }
+
+        /// <summary>
+        /// Inverts the projection around 0;
+        /// </summary>
+        public void InvertZero()
+        {
+            top = -top;
+            left = -left;
+            right = -right;
+            bottom = -bottom;
+            projectionIsDirty = true;
+        }
+
+        /// <summary>
+        /// Inverts the projection.
+        /// </summary>
+        public void Invert()
+        {
+            float f = top;
+            top = bottom;
+            bottom = f;
+            f = left;
+            left = right;
+            right = f;
+        }
+
+        /// <summary>
+        /// Offsets the centre of the camera.
+        /// </summary>
+        /// <param name="offset"></param>
+        public void Offset(Vector2 offset)
+        {
+            Offset(offset.X, offset.Y);
+        }
+
+        /// <summary>
+        /// Offsets the centre of the camera.
+        /// </summary>
+        /// <param name="h">Horizontal offset.</param>
+        /// <param name="v">Vertical offset.</param>
+        public void Offset(float h, float v)
+        {
+            top += v;
+            left += h;
+            right += h;
+            bottom += v;
+        }
     }
 
     public class Camera3DOrthographic : Camera3D
@@ -862,9 +932,23 @@ namespace WM.Framework.Monogame
             projectionIsDirty = true;
         }
 
+        /// <summary>
+        /// Transforms this <see cref="Camera3DOrthographic"/> in a <see cref="Camera3DOrthographicOffCentre"/>;
+        /// </summary>
+        /// <returns></returns>
         public Camera3DOrthographicOffCentre ToOrthographicOffCentre()
         {
             return new Camera3DOrthographicOffCentre(position, direction, up, width, height, nearPlane, farPlane);
+        }
+
+        /// <summary>
+        /// Inverts the projection.
+        /// </summary>
+        public void Invert()
+        {
+            height = -height;
+            width = -width;
+            projectionIsDirty = true;
         }
     }
 
@@ -1074,6 +1158,53 @@ namespace WM.Framework.Monogame
             right /= amount;
             bottom /= amount;
             projectionIsDirty = true;
+        }
+
+        /// <summary>
+        /// Inverts the projection around 0;
+        /// </summary>
+        public void InvertZero()
+        {
+            top = -top;
+            left = -left;
+            right = -right;
+            bottom = -bottom;
+            projectionIsDirty = true;
+        }
+
+        /// <summary>
+        /// Inverts the projection.
+        /// </summary>
+        public void Invert()
+        {
+            float f = top;
+            top = bottom;
+            bottom = f;
+            f = left;
+            left = right;
+            right = f;
+        }
+
+        /// <summary>
+        /// Offsets the centre of the camera.
+        /// </summary>
+        /// <param name="offset"></param>
+        public void Offset(Vector2 offset)
+        {
+            Offset(offset.X, offset.Y);
+        }
+
+        /// <summary>
+        /// Offsets the centre of the camera.
+        /// </summary>
+        /// <param name="h">Horizontal offset.</param>
+        /// <param name="v">Vertical offset.</param>
+        public void Offset(float h, float v)
+        {
+            top += v;
+            left += h;
+            right += h;
+            bottom += v;
         }
     }
 }
