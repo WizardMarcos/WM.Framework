@@ -8,6 +8,15 @@ using System.Threading.Tasks;
 
 namespace WM.Framework.Monogame
 {
+    // Just writing this here so it is seen.
+    // There is still a bug with the camera, if you look up or
+    // down, and the pitch you add makes it so you turn around,
+    // the camera will quickly flip. I'm trying to come up with
+    // a fix, meanwhile I'll open an issue in the repo.
+    // Also, about the invert functions. I'm not really sure
+    // if they are even needed. I just felt like adding them,
+    // they can be completely wrong.
+
     public abstract class Camera3D
     {
         // Every variable as a public property assigned to it, which also
