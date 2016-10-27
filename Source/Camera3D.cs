@@ -234,6 +234,8 @@ namespace WM.Framework.Monogame
             // This one is a bit more complex, as we want to find the forward
             // vector in relation to both the up and direction vectors.
             // It will be the cross product of the horizontal and up vectors.
+            // Also, we need to flip the amount, because positive is actually backwards.
+            amount = -amount;
             position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * amount;
             viewIsDirty = true;
         }
@@ -246,6 +248,23 @@ namespace WM.Framework.Monogame
         public void Above(Vector3 location, float distance)
         {
             position = location + up * distance;
+            viewIsDirty = true;
+        }
+
+        /// <summary>
+        /// Follows a target, keeping the camera's up vector.
+        /// </summary>
+        /// <param name="target">The target to look at.</param>
+        /// <param name="targetDirection">The target's direction.</param>
+        /// <param name="relativeCameraDirection">The camera's direction relative to the target.</param>
+        /// <param name="distance">The camera's distance to the target.</param>
+        public void FollowUpright(Vector3 target, Vector3 targetDirection, Vector3 relativeCameraDirection, float distance = 1)
+        {
+            // This was a bit of a pain to write. Still, it works, which is nice.
+            // The camera will keep its up vector, and follow a target around.
+            direction = Vector3.Normalize(-Vector3.TransformNormal(relativeCameraDirection, 
+                Matrix.CreateLookAt(Vector3.Zero, targetDirection, -up)));
+            position = target - direction * distance;
             viewIsDirty = true;
         }
 
