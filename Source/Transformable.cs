@@ -58,15 +58,26 @@ namespace WM.Framework.Monogame
                 if (matrixChanged)
                 {
                     matrixChanged = false;
-                    SetWorld();
+                    CalculateWorld();
                 }
 
                 return world;
             }
         }
 
-        protected virtual void SetWorld()
+        // We are declaring this method as protected and virtual
+        // to allow anyone to override and add more matrices to
+        // the world matrix calculation, for example, to rotate
+        // around a point.
+        protected virtual void CalculateWorld()
         {
+            // To calculate the world matrix, we need to multiply
+            // all transformation matrices. The multiplication
+            // order is important. It usually the inverse order
+            // of what you want to do. Why? If you rotate and then
+            // move something in the rotated direction, you will
+            // have it at a different position than if you moved
+            // it and then rotated.
             world = scale * rotation * translation;
         }
 
@@ -78,35 +89,83 @@ namespace WM.Framework.Monogame
             scale = Matrix.Identity;
         }
 
+        /// <summary>
+        /// Resets the rotation.
+        /// </summary>
+        public void ResetRotation()
+        {
+            rotation = Matrix.Identity;
+            matrixChanged = true;
+        }
+
+        /// <summary>
+        /// Resets the location.
+        /// </summary>
+        public void ResetTranslation()
+        {
+            translation = Matrix.Identity;
+            matrixChanged = true;
+        }
+
+        /// <summary>
+        /// Resets the scale.
+        /// </summary>
+        public void ResetScale()
+        {
+            scale = Matrix.Identity;
+            matrixChanged = true;
+        }
+
+        /// <summary>
+        /// Applies a rotation to the current one.
+        /// </summary>
+        /// <param name="rotation"></param>
         public void Rotate(Matrix rotation)
         {
-            this.rotation = rotation * this.rotation;
+            this.rotation = this.rotation * rotation;
             matrixChanged = true;
         }
 
+        /// <summary>
+        /// Translates relative to the current position.
+        /// </summary>
+        /// <param name="translation"></param>
         public void Translate(Matrix translation)
         {
-            this.translation = translation + this.translation;
+            this.translation = this.translation * translation;
             matrixChanged = true;
         }
 
+        /// <summary>
+        /// Scales relative to the current scale.
+        /// </summary>
+        /// <param name="scale"></param>
         public void Scale(Matrix scale)
         {
-            this.scale = scale * this.scale;
+            this.scale = this.scale * scale;
             matrixChanged = true;
         }
 
-        public void Thrust(float amount)
+        /// <summary>
+        /// Tries to set the world matrix. Returns true if it was able, else returns false.
+        /// </summary>
+        /// <param name="world"></param>
+        /// <returns></returns>
+        public bool SetWorldMatrix(Matrix world)
         {
-            Translate(Matrix.CreateTranslation(Vector3.Transform(Vector3.Forward, rotation) * amount));
-        }
+            Vector3 t, s;
+            Quaternion r;
+            bool b = world.Decompose(out s, out r, out t);
 
-        public void StrafeHorizontally(float amount)
-        {
-            Translate(Matrix.CreateTranslation(
-                Vector3.Normalize( Vector3.Cross(
-                        Vector3.Transform(Vector3.Forward, rotation),
-                        Vector3.Transform(Vector3.Up, rotation)))));
+            if (b)
+            {
+                translation = Matrix.CreateTranslation(t);
+                rotation = Matrix.CreateFromQuaternion(r);
+                scale = Matrix.CreateScale(s);
+                matrixChanged = true;
+            }
+
+            return b;
         }
     }
 }
