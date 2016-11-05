@@ -197,7 +197,7 @@ namespace WM.Framework.Monogame
         /// Moves the camera into the direction it is pointing to.
         /// </summary>
         /// <param name="amount">The amount to move.</param>
-        public void Thurst(float amount)
+        public void Thrust(float amount)
         {
             // The direction is a normalized vector, so we can simply multiply it
             // by an amount and it properly thrusts the camera.
@@ -244,8 +244,20 @@ namespace WM.Framework.Monogame
             // vector in relation to both the up and direction vectors.
             // It will be the cross product of the horizontal and up vectors.
             // Also, we need to flip the amount, because positive is actually backwards.
-            amount = -amount;
-            position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * amount;
+            position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * -amount;
+            viewIsDirty = true;
+        }
+
+        /// <summary>
+        /// Raises the camera in relation to its direction.
+        /// </summary>
+        /// <param name="amount">The amount to raise.</param>
+        public void Raise(float amount)
+        {
+            // Similar to forward straffing, but we use the direction vector
+            // instead of the up to go upwards in relation to where it is
+            // pointing at.
+            position += Vector3.Normalize(Vector3.Cross(direction, Vector3.Cross(up, direction))) * amount;
             viewIsDirty = true;
         }
 
