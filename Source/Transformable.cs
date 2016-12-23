@@ -10,7 +10,7 @@ namespace WM.Framework.Monogame
     public abstract class Transformable
     {
         protected Vector3 position, scaling;
-        protected Quaternion rotation;
+        protected Matrix rotation;
         protected Matrix world;
         protected bool worldDirty;
 
@@ -23,6 +23,7 @@ namespace WM.Framework.Monogame
             set
             {
                 position = value;
+                worldDirty = true;
             }
         }
         public Vector3 Scaling
@@ -34,9 +35,10 @@ namespace WM.Framework.Monogame
             set
             {
                 scaling = value;
+                worldDirty = true;
             }
         }
-        public Quaternion Rotation
+        public Matrix Rotation
         {
             get
             {
@@ -45,7 +47,7 @@ namespace WM.Framework.Monogame
             set
             {
                 rotation = value;
-                NormalizeRotationWhenNeeded();
+                worldDirty = true;
             }
         }
 
@@ -63,15 +65,97 @@ namespace WM.Framework.Monogame
             }
         }
 
+        public Vector3 Up
+        {
+            get
+            {
+                return rotation.Up;
+            }
+            set
+            {
+                rotation.Up = value;
+                worldDirty = true;
+            }
+        }
+        public Vector3 Down
+        {
+            get
+            {
+                return rotation.Down;
+            }
+            set
+            {
+                rotation.Down = value;
+                worldDirty = true;
+            }
+        }
+        public Vector3 Forward
+        {
+            get
+            {
+                return rotation.Forward;
+            }
+            set
+            {
+                rotation.Forward = value;
+                worldDirty = true;
+            }
+        }
+        public Vector3 Backward
+        {
+            get
+            {
+                return rotation.Backward;
+            }
+            set
+            {
+                rotation.Backward = value;
+                worldDirty = true;
+            }
+        }
+        public Vector3 Left
+        {
+            get
+            {
+                return rotation.Left;
+            }
+            set
+            {
+                rotation.Left = value;
+                worldDirty = true;
+            }
+        }
+        public Vector3 Right
+        {
+            get
+            {
+                return rotation.Right;
+            }
+            set
+            {
+                rotation.Right = value;
+                worldDirty = true;
+            }
+        }
+
+        public Quaternion RotationQ
+        {
+            get
+            {
+                return rotation.Rotation;
+            }
+        }
+
         // This method can be overriden to allow for different ways to
-        // calculate the world matrix.
+        // calculate the world matrix (if you wish to add skewing or
+        // other transformations).
         protected virtual void CalculateWorldMatrix()
         {
             // To get the world matrix, we will need to multiply the matrices
             // in the opposite order we want to execute them. A different order
             // will yield a different result. If we rotate then move we will get
             // a different result than if we had moved then rotated.
-            world = Matrix.CreateScale(scaling) * Matrix.CreateFromQuaternion(rotation) * Matrix.CreateTranslation(position);
+            world = Matrix.CreateScale(scaling) * rotation * Matrix.CreateTranslation(position);
         }
 
         /// <summary>
@@ -81,18 +165,8 @@ namespace WM.Framework.Monogame
         {
             position = Vector3.Zero;
             scaling = Vector3.One;
-            rotation = Quaternion.Identity;
+            rotation = Matrix.Identity;
             worldDirty = true;
-        }
-
-        private void NormalizeRotationWhenNeeded()
-        {
-            float lengthSr = rotation.LengthSquared();
-            if (lengthSr > 1.0001 || lengthSr < 0.9998)
-            {
-                rotation.Normalize();
-                worldDirty = true;
-            }
         }
 
         /// <summary>
@@ -100,6 +174,10 @@ namespace WM.Framework.Monogame
         /// </summary>
         public void Translate(Vector3 translation)
         {
+            // You might question why I'm using Vector3.Add() instead
+            // of just using the + operator. Well it seems that, for
+            // some reason, using a method like this is faster than
+            // using an operator, even though it shouldn't. ¯\_(ツ)_/¯
             position = Vector3.Add(position, translation);
             worldDirty = true;
         }
@@ -118,8 +196,7 @@ namespace WM.Framework.Monogame
         /// </summary>
         public void Rotate(Quaternion rotation)
         {
-            this.rotation = Quaternion.Multiply(rotation, this.rotation);
-            NormalizeRotationWhenNeeded();
+            this.rotation = Matrix.Multiply(Matrix.CreateFromQuaternion(rotation), this.rotation);
             worldDirty = true;
         }
 
@@ -128,8 +205,7 @@ namespace WM.Framework.Monogame
         /// </summary>
         public void Rotate(Matrix rotation)
         {
-            this.rotation = Quaternion.Multiply(Quaternion.CreateFromRotationMatrix(rotation), this.rotation);
-            NormalizeRotationWhenNeeded();
+            this.rotation = Matrix.Multiply(rotation, this.rotation);
             worldDirty = true;
         }
 
@@ -161,6 +237,62 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
+        /// Applies a rotation, but instead of applying to the object's pivot,
+        /// it's around a custom pivot.
+        /// </summary>
+        /// <param name="pivot"></param>
+        /// <param name="rotation"></param>
+        public void RotateAround(Vector3 pivot, Matrix rotation)
+        {
+            position = Vector3.Add(pivot, Vector3.Transform(
+                Vector3.Subtract(position, pivot),
+                rotation));
+            this.rotation = Matrix.Multiply(rotation, this.rotation);
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Applies a rotation, but instead of applying to the object's pivot,
+        /// it's around a custom pivot. This method doesn't apply the rotation
+        /// to the object itself, only to the position.
+        /// </summary>
+        /// <param name="pivot"></param>
+        /// <param name="rotation"></param>
+        public void RotateAroundOnly(Vector3 pivot, Matrix rotation)
+        {
+            position = Vector3.Add(pivot, Vector3.Transform(
+                Vector3.Subtract(position, pivot),
+                rotation));
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Thrusts this instance forward.
+        /// </summary>
+        /// <param name="amount"></param>
+        public void Thrust(float amount)
+        {
+            position = Vector3.Add(position, Vector3.Multiply(rotation.Forward, amount));
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Sets the up vector, transforming the other components of the rotation.
+        /// </summary>
+        /// <param name="up">The new up vector.</param>
+        /// <remarks>The left vector is created from the existing forward and the new up vectors.
+        /// The new forward vector is then calculated from the new left and up vectors.</remarks>
+        public void SetRotationFromUp(Vector3 up)
+        {
+            rotation.Up = up;
+            rotation.Left = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
+            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Left, up));
+            worldDirty = true;
+        }
+
+        #region RESETS
+
+        /// <summary>
         /// Resets the position to the origin.
         /// </summary>
         public void ResetPosition()
@@ -174,7 +306,7 @@ namespace WM.Framework.Monogame
         /// </summary>
         public void ResetRotation()
         {
-            rotation = Quaternion.Identity;
+            rotation = Matrix.Identity;
             worldDirty = true;
         }
 
@@ -186,5 +318,7 @@ namespace WM.Framework.Monogame
             scaling = Vector3.One;
             worldDirty = true;
         }
+
+        #endregion
     }
 }
