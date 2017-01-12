@@ -282,7 +282,7 @@ namespace WM.Framework.Monogame
         /// <param name="up">The new up vector.</param>
         /// <remarks>The left vector is created from the existing forward and the new up vectors.
         /// The new forward vector is then calculated from the new left and up vectors.</remarks>
-        public void SetRotationFromUp(Vector3 up)
+        public void SetRotationFromUpL(Vector3 up)
         {
             rotation.Up = up;
             rotation.Left = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
@@ -290,7 +290,21 @@ namespace WM.Framework.Monogame
             worldDirty = true;
         }
 
-        #region RESETS
+        /// <summary>
+        /// Sets the up vector, transforming the other components of the rotation.
+        /// </summary>
+        /// <param name="up">The new up vector.</param>
+        /// <remarks>The forward vector is created from the existing left and the new up vectors.
+        /// The new left vector is then calculated from the new forward and up vectors.</remarks>
+        public void SetRotationFromUpF(Vector3 up)
+        {
+            rotation.Up = up;
+            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Left, up));
+            rotation.Left = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
+            worldDirty = true;
+        }
+
+        #region RESETS AND NORMALIZATIONS
 
         /// <summary>
         /// Resets the position to the origin.
@@ -316,6 +330,17 @@ namespace WM.Framework.Monogame
         public void ResetScale()
         {
             scaling = Vector3.One;
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Normalizes the vectors in the rotation matrix.
+        /// </summary>
+        public void NormalizeRotation()
+        {
+            rotation.Forward.Normalize();
+            rotation.Left.Normalize();
+            rotation.Up.Normalize();
             worldDirty = true;
         }
 
