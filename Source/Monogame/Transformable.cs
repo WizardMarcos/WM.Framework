@@ -207,7 +207,7 @@ namespace WM.Framework.Monogame
         /// </summary>
         public void Rotate(Quaternion rotation)
         {
-            this.rotation = Matrix.Multiply(Matrix.CreateFromQuaternion(rotation), this.rotation);
+            this.rotation = Matrix.Multiply(this.rotation, Matrix.CreateFromQuaternion(rotation));
             worldDirty = true;
         }
 
@@ -216,7 +216,7 @@ namespace WM.Framework.Monogame
         /// </summary>
         public void Rotate(Matrix rotation)
         {
-            this.rotation = Matrix.Multiply(rotation, this.rotation);
+            this.rotation = Matrix.Multiply(this.rotation, rotation);
             worldDirty = true;
         }
 
