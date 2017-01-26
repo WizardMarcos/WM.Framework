@@ -256,7 +256,7 @@ namespace WM.Framework.Monogame
         /// <param name="up">The new up vector.</param>
         /// <remarks>The right vector is created from the existing forward and the new up vectors.
         /// The new forward vector is then calculated from the new right and up vectors.</remarks>
-        public void SetRotationFromUpL(Vector3 up)
+        public void SetRotationFromUpR(Vector3 up)
         {
             rotation.Up = up;
             rotation.Right = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
