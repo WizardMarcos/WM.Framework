@@ -164,6 +164,8 @@ namespace WM.Framework.Monogame
             worldDirty = true;
         }
 
+        #region TRANSLATION
+
         /// <summary>
         /// Translates this instance.
         /// </summary>
@@ -187,6 +189,20 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
+        /// Thrusts this instance forward.
+        /// </summary>
+        /// <param name="amount"></param>
+        public void Thrust(float amount)
+        {
+            position = Vector3.Add(position, Vector3.Multiply(rotation.Forward, amount));
+            worldDirty = true;
+        }
+
+        #endregion
+
+        #region ROTATION
+
+        /// <summary>
         /// Applies a rotation to this instance.
         /// </summary>
         public void Rotate(Quaternion rotation)
@@ -201,33 +217,6 @@ namespace WM.Framework.Monogame
         public void Rotate(Matrix rotation)
         {
             this.rotation = Matrix.Multiply(rotation, this.rotation);
-            worldDirty = true;
-        }
-
-        /// <summary>
-        /// Scales this instance.
-        /// </summary>
-        public void Scale(Vector3 scale)
-        {
-            scaling = Vector3.Multiply(scaling, scale);
-            worldDirty = true;
-        }
-
-        /// <summary>
-        /// Scales this instance.
-        /// </summary>
-        public void Scale(float scale)
-        {
-            scaling = Vector3.Multiply(scaling, scale);
-            worldDirty = true;
-        }
-
-        /// <summary>
-        /// Scales this instance.
-        /// </summary>
-        public void Scale(Matrix scale)
-        {
-            scaling = Vector3.Transform(scaling, scale);
             worldDirty = true;
         }
 
@@ -262,16 +251,6 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Thrusts this instance forward.
-        /// </summary>
-        /// <param name="amount"></param>
-        public void Thrust(float amount)
-        {
-            position = Vector3.Add(position, Vector3.Multiply(rotation.Forward, amount));
-            worldDirty = true;
-        }
-
-        /// <summary>
         /// Sets the up vector, transforming the other components of the rotation.
         /// </summary>
         /// <param name="up">The new up vector.</param>
@@ -298,6 +277,39 @@ namespace WM.Framework.Monogame
             rotation.Left = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
             worldDirty = true;
         }
+
+        #endregion
+
+        #region SCALE
+
+        /// <summary>
+        /// Scales this instance.
+        /// </summary>
+        public void Scale(Vector3 scale)
+        {
+            scaling = Vector3.Multiply(scaling, scale);
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Scales this instance.
+        /// </summary>
+        public void Scale(float scale)
+        {
+            scaling = Vector3.Multiply(scaling, scale);
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Scales this instance.
+        /// </summary>
+        public void Scale(Matrix scale)
+        {
+            scaling = Vector3.Transform(scaling, scale);
+            worldDirty = true;
+        }
+
+        #endregion
 
         #region RESETS AND NORMALIZATIONS
 
