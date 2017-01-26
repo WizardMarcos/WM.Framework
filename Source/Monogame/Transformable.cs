@@ -254,13 +254,13 @@ namespace WM.Framework.Monogame
         /// Sets the up vector, transforming the other components of the rotation.
         /// </summary>
         /// <param name="up">The new up vector.</param>
-        /// <remarks>The left vector is created from the existing forward and the new up vectors.
-        /// The new forward vector is then calculated from the new left and up vectors.</remarks>
+        /// <remarks>The right vector is created from the existing forward and the new up vectors.
+        /// The new forward vector is then calculated from the new right and up vectors.</remarks>
         public void SetRotationFromUpL(Vector3 up)
         {
             rotation.Up = up;
-            rotation.Left = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
-            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Left, up));
+            rotation.Right = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
+            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Right, up));
             worldDirty = true;
         }
 
@@ -268,13 +268,43 @@ namespace WM.Framework.Monogame
         /// Sets the up vector, transforming the other components of the rotation.
         /// </summary>
         /// <param name="up">The new up vector.</param>
-        /// <remarks>The forward vector is created from the existing left and the new up vectors.
-        /// The new left vector is then calculated from the new forward and up vectors.</remarks>
+        /// <remarks>The forward vector is created from the existing right and the new up vectors.
+        /// The new right vector is then calculated from the new forward and up vectors.</remarks>
         public void SetRotationFromUpF(Vector3 up)
         {
             rotation.Up = up;
-            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Left, up));
-            rotation.Left = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
+            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Right, up));
+            rotation.Right = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Rotates the transformable around its up vector.
+        /// </summary>
+        /// <param name="angle"></param>
+        public void Yaw(float angle)
+        {
+            rotation = Matrix.Multiply(rotation, Matrix.CreateFromAxisAngle(rotation.Up, angle));
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Rotates the transformable around its right vector.
+        /// </summary>
+        /// <param name="angle"></param>
+        public void Pitch(float angle)
+        {
+            rotation = Matrix.Multiply(rotation, Matrix.CreateFromAxisAngle(rotation.Right, angle));
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Rotates the transformable around its forward vector.
+        /// </summary>
+        /// <param name="angle"></param>
+        public void Roll(float angle)
+        {
+            rotation = Matrix.Multiply(rotation, Matrix.CreateFromAxisAngle(rotation.Forward, angle));
             worldDirty = true;
         }
 
@@ -346,7 +376,7 @@ namespace WM.Framework.Monogame
         public void NormalizeRotation()
         {
             rotation.Forward.Normalize();
-            rotation.Left.Normalize();
+            rotation.Right.Normalize();
             rotation.Up.Normalize();
             worldDirty = true;
         }

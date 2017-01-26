@@ -261,17 +261,7 @@ namespace WM.Framework.Monogame
             viewIsDirty = true;
         }
 
-        /// <summary>
-        /// Positions the camera so that it is at the specified distance from a <see cref="Vector3"/>.
-        /// </summary>
-        /// <param name="location">The location.</param>
-        /// <param name="distance">The distance from the location.</param>
-        public void Above(Vector3 location, float distance)
-        {
-            position = location + up * distance;
-            viewIsDirty = true;
-        }
-
+        /*
         /// <summary>
         /// Follows a target, keeping the camera's up vector.
         /// </summary>
@@ -288,6 +278,7 @@ namespace WM.Framework.Monogame
             position = target - direction * distance;
             viewIsDirty = true;
         }
+        */
 
         #endregion
 
