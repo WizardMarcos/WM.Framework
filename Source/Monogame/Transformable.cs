@@ -279,8 +279,8 @@ namespace WM.Framework.Monogame
         public void SetRotationFromUpR(Vector3 up)
         {
             rotation.Up = up;
-            rotation.Right = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
-            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Right, up));
+            rotation.Right = Vector3.Normalize(Vector3.Cross(rotation.Forward, up));
+            rotation.Forward = Vector3.Normalize(Vector3.Cross(up, rotation.Right));
             worldDirty = true;
         }
 
@@ -293,8 +293,8 @@ namespace WM.Framework.Monogame
         public void SetRotationFromUpF(Vector3 up)
         {
             rotation.Up = up;
-            rotation.Forward = Vector3.Normalize(Vector3.Cross(rotation.Right, up));
-            rotation.Right = Vector3.Normalize(Vector3.Cross(up, rotation.Forward));
+            rotation.Forward = Vector3.Normalize(Vector3.Cross(up, rotation.Right));
+            rotation.Right = Vector3.Normalize(Vector3.Cross(rotation.Forward, up));
             worldDirty = true;
         }
 
