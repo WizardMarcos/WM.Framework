@@ -167,7 +167,7 @@ namespace WM.Framework.Monogame
         #region TRANSLATION
 
         /// <summary>
-        /// Translates this instance.
+        /// Translates this <see cref="Transformable"/>.
         /// </summary>
         public void Translate(Vector3 translation)
         {
@@ -180,7 +180,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Translates this instance.
+        /// Translates this <see cref="Transformable"/>.
         /// </summary>
         public void Translate(Matrix translation)
         {
@@ -189,7 +189,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Thrusts this instance forward.
+        /// Thrusts this <see cref="Transformable"/> forward.
         /// </summary>
         /// <param name="amount"></param>
         public void Thrust(float amount)
@@ -198,12 +198,32 @@ namespace WM.Framework.Monogame
             worldDirty = true;
         }
 
+        /// <summary>
+        /// Strafes this <see cref="Transformable"/> horizontally.
+        /// </summary>
+        /// <param name="amount"></param>
+        public void StrafeHorizontally(float amount)
+        {
+            position += rotation.Right * amount;
+            worldDirty = true;
+        }
+
+        /// <summary>
+        /// Strafes this <see cref="Transformable"/> vertically.
+        /// </summary>
+        /// <param name="amount"></param>
+        public void StrafeVertically(float amount)
+        {
+            position += rotation.Up * amount;
+            worldDirty = true;
+        }
+
         #endregion
 
         #region ROTATION
 
         /// <summary>
-        /// Applies a rotation to this instance.
+        /// Applies a rotation to this <see cref="Transformable"/>.
         /// </summary>
         public void Rotate(Quaternion rotation)
         {
@@ -212,7 +232,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Applies a rotation to this instance.
+        /// Applies a rotation to this <see cref="Transformable"/>.
         /// </summary>
         public void Rotate(Matrix rotation)
         {
@@ -279,7 +299,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Rotates the transformable around its up vector.
+        /// Rotates the <see cref="Transformable"/> around its up vector.
         /// </summary>
         /// <param name="angle"></param>
         public void Yaw(float angle)
@@ -289,7 +309,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Rotates the transformable around its right vector.
+        /// Rotates the <see cref="Transformable"/> around its right vector.
         /// </summary>
         /// <param name="angle"></param>
         public void Pitch(float angle)
@@ -299,7 +319,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Rotates the transformable around its forward vector.
+        /// Rotates the <see cref="Transformable"/> around its forward vector.
         /// </summary>
         /// <param name="angle"></param>
         public void Roll(float angle)
@@ -313,7 +333,7 @@ namespace WM.Framework.Monogame
         #region SCALE
 
         /// <summary>
-        /// Scales this instance.
+        /// Scales this <see cref="Transformable"/>.
         /// </summary>
         public void Scale(Vector3 scale)
         {
@@ -322,7 +342,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Scales this instance.
+        /// Scales this <see cref="Transformable"/>.
         /// </summary>
         public void Scale(float scale)
         {
@@ -331,7 +351,7 @@ namespace WM.Framework.Monogame
         }
 
         /// <summary>
-        /// Scales this instance.
+        /// Scales this <see cref="Transformable"/>.
         /// </summary>
         public void Scale(Matrix scale)
         {

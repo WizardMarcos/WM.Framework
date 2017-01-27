@@ -38,13 +38,13 @@ namespace WM.Framework.Monogame
             set
             {
                 position = value;
-                viewIsDirty = true;
+                viewDirty = true;
             }
         }
         public void ChangePosition(Vector3 position)
         {
             this.position = position;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         #endregion
@@ -61,13 +61,13 @@ namespace WM.Framework.Monogame
             set
             {
                 direction = Vector3.Normalize(value);
-                viewIsDirty = true;
+                viewDirty = true;
             }
         }
         public void ChangeDirection(Vector3 direction)
         {
             this.direction = Vector3.Normalize(direction);
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         #endregion
@@ -84,13 +84,13 @@ namespace WM.Framework.Monogame
             set
             {
                 up = Vector3.Normalize(value);
-                viewIsDirty = true;
+                viewDirty = true;
             }
         }
         public void ChangeUpVector(Vector3 up)
         {
             this.up = Vector3.Normalize(up);
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         #endregion
@@ -112,13 +112,13 @@ namespace WM.Framework.Monogame
             set
             {
                 nearPlane = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetNearPlane(float nearPlane)
         {
             this.nearPlane = nearPlane;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -137,33 +137,33 @@ namespace WM.Framework.Monogame
             set
             {
                 farPlane = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetFarPlane(float farPlane)
         {
             this.farPlane = farPlane;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
 
         // The View and Projection Matrices.
         // I would reccomend you to read RB Whitaker's matrix explanation
-        // to understand what these matrices are why they are needed.
+        // to understand what these matrices are and why they are needed.
         // http://rbwhitaker.wikidot.com/monogame-basic-matrices
         #region VIEW MATRIX
 
-        protected bool viewIsDirty;
+        protected bool viewDirty;
         private Matrix viewMatrix;
         public Matrix ViewMatrix
         {
             get
             {
-                if (viewIsDirty)
+                if (viewDirty)
                 {
                     viewMatrix = Matrix.CreateLookAt(position, position + direction, up);
-                    viewIsDirty = false;
+                    viewDirty = false;
                 }
                 return viewMatrix;
             }
@@ -172,7 +172,7 @@ namespace WM.Framework.Monogame
         #endregion
         #region PROJECTION MATRIX
 
-        protected bool projectionIsDirty;
+        protected bool projectionDirty;
         protected Matrix projectionMatrix;
         public abstract Matrix ProjectionMatrix { get; }
 
@@ -190,7 +190,7 @@ namespace WM.Framework.Monogame
             // because the target is calculated with the direction, which doesn't
             // change.
             position += translation;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -202,7 +202,7 @@ namespace WM.Framework.Monogame
             // The direction is a normalized vector, so we can simply multiply it
             // by an amount and it properly thrusts the camera.
             position += direction * amount;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -216,7 +216,7 @@ namespace WM.Framework.Monogame
             // vectors. We can use Vector3.Cross to do that. Then we just have to
             // normalize the result and multiply it by the amount we want to strafe.
             position += Vector3.Normalize(Vector3.Cross(up, direction)) * amount;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -230,7 +230,7 @@ namespace WM.Framework.Monogame
             // is already normalized, so we just multiply it by the amount
             // we want to strafe.
             position += up * amount;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace WM.Framework.Monogame
             // It will be the cross product of the horizontal and up vectors.
             // Also, we need to flip the amount, because positive is actually backwards.
             position += Vector3.Normalize(Vector3.Cross(up, Vector3.Cross(up, direction))) * -amount;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -258,7 +258,7 @@ namespace WM.Framework.Monogame
             // instead of the up to go upwards in relation to where it is
             // pointing at.
             position += Vector3.Normalize(Vector3.Cross(direction, Vector3.Cross(up, direction))) * amount;
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /*
@@ -295,7 +295,7 @@ namespace WM.Framework.Monogame
             // the vector. The method CreateFromAxisAngle (which is also available
             // in matrices) can be used for that.
             direction = Vector3.Transform(direction, Quaternion.CreateFromAxisAngle(up, angle));
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -318,7 +318,7 @@ namespace WM.Framework.Monogame
             if (changeUp)
                 up = Vector3.Transform(up, Quaternion.CreateFromAxisAngle(v, angle));
 
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         /// <summary>
@@ -466,7 +466,7 @@ namespace WM.Framework.Monogame
         {
             // The direction is calculated from the target and position.
             direction = Vector3.Normalize(target - position);
-            viewIsDirty = true;
+            viewDirty = true;
         }
 
         #endregion
@@ -489,13 +489,13 @@ namespace WM.Framework.Monogame
             set
             {
                 fov = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetFov(float fov)
         {
             this.fov = fov;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -511,13 +511,13 @@ namespace WM.Framework.Monogame
             set
             {
                 aspectRatio = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetAspectRatio(float aspectRatio)
         {
             this.aspectRatio = aspectRatio;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -529,12 +529,12 @@ namespace WM.Framework.Monogame
         {
             get
             {
-                if (projectionIsDirty)
+                if (projectionDirty)
                 {
                     // This camera creates the projection matrix using the field of view,
                     // aspect ratio and the near plane and far plane distances.
                     projectionMatrix = Matrix.CreatePerspectiveFieldOfView(fov, aspectRatio, NearPlane, FarPlane);
-                    projectionIsDirty = false;
+                    projectionDirty = false;
                 }
                 return projectionMatrix;
             }
@@ -562,14 +562,14 @@ namespace WM.Framework.Monogame
             this.aspectRatio = aspectRatio;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
+            viewDirty = true;
+            projectionDirty = true;
         }
 
         public override void Zoom(float amount)
         {
             fov /= amount;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -600,13 +600,13 @@ namespace WM.Framework.Monogame
             set
             {
                 left = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetLeft(float left)
         {
             this.left = left;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -622,13 +622,13 @@ namespace WM.Framework.Monogame
             set
             {
                 right = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetRight(float right)
         {
             this.right = right;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -644,13 +644,13 @@ namespace WM.Framework.Monogame
             set
             {
                 bottom = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetBottom(float bottom)
         {
             this.bottom = bottom;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -666,13 +666,13 @@ namespace WM.Framework.Monogame
             set
             {
                 top = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetTop(float top)
         {
             this.top = top;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -691,7 +691,7 @@ namespace WM.Framework.Monogame
                 float f = value / Width;
                 left *= f;
                 right *= f;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public float Height
@@ -705,7 +705,7 @@ namespace WM.Framework.Monogame
                 float f = value / Height;
                 top *= f;
                 bottom *= f;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
 
@@ -718,10 +718,10 @@ namespace WM.Framework.Monogame
         {
             get
             {
-                if (projectionIsDirty)
+                if (projectionDirty)
                 {
                     projectionMatrix = Matrix.CreatePerspectiveOffCenter(left, right, bottom, top, nearPlane, farPlane);
-                    projectionIsDirty = false;
+                    projectionDirty = false;
                 }
                 return projectionMatrix;
             }
@@ -753,8 +753,8 @@ namespace WM.Framework.Monogame
             this.top = top;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
+            viewDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -779,8 +779,8 @@ namespace WM.Framework.Monogame
             this.top = bottom + height;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
+            viewDirty = true;
+            projectionDirty = true;
         }
 
         public override void Zoom(float amount)
@@ -789,7 +789,7 @@ namespace WM.Framework.Monogame
             left /= amount;
             right /= amount;
             bottom /= amount;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -801,7 +801,7 @@ namespace WM.Framework.Monogame
             left = -left;
             right = -right;
             bottom = -bottom;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -860,13 +860,13 @@ namespace WM.Framework.Monogame
             set
             {
                 width = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetWidth(float width)
         {
             this.width = width;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -882,13 +882,13 @@ namespace WM.Framework.Monogame
             set
             {
                 height = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetHeight(float height)
         {
             this.height = height;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -900,10 +900,10 @@ namespace WM.Framework.Monogame
         {
             get
             {
-                if (projectionIsDirty)
+                if (projectionDirty)
                 {
                     projectionMatrix = Matrix.CreateOrthographic(width, height, nearPlane, farPlane);
-                    projectionIsDirty = false;
+                    projectionDirty = false;
                 }
                 return projectionMatrix;
             }
@@ -933,15 +933,15 @@ namespace WM.Framework.Monogame
             this.height = height;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
+            viewDirty = true;
+            projectionDirty = true;
         }
 
         public override void Zoom(float amount)
         {
             width /= amount;
             height /= amount;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -960,7 +960,7 @@ namespace WM.Framework.Monogame
         {
             height = -height;
             width = -width;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
     }
 
@@ -981,13 +981,13 @@ namespace WM.Framework.Monogame
             set
             {
                 left = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetLeft(float left)
         {
             this.left = left;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -1003,13 +1003,13 @@ namespace WM.Framework.Monogame
             set
             {
                 right = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetRight(float right)
         {
             this.right = right;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -1025,13 +1025,13 @@ namespace WM.Framework.Monogame
             set
             {
                 bottom = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetBottom(float bottom)
         {
             this.bottom = bottom;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -1047,13 +1047,13 @@ namespace WM.Framework.Monogame
             set
             {
                 top = value;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public void SetTop(float top)
         {
             this.top = top;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         #endregion
@@ -1071,7 +1071,7 @@ namespace WM.Framework.Monogame
                 float f = value / Width;
                 left *= f;
                 right *= f;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
         public float Height
@@ -1085,7 +1085,7 @@ namespace WM.Framework.Monogame
                 float f = value / Height;
                 top *= f;
                 bottom *= f;
-                projectionIsDirty = true;
+                projectionDirty = true;
             }
         }
 
@@ -1098,10 +1098,10 @@ namespace WM.Framework.Monogame
         {
             get
             {
-                if (projectionIsDirty)
+                if (projectionDirty)
                 {
                     projectionMatrix = Matrix.CreateOrthographicOffCenter(left, right, bottom, top, nearPlane, farPlane);
-                    projectionIsDirty = false;
+                    projectionDirty = false;
                 }
                 return projectionMatrix;
             }
@@ -1133,8 +1133,8 @@ namespace WM.Framework.Monogame
             this.top = top;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
+            viewDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -1159,8 +1159,8 @@ namespace WM.Framework.Monogame
             this.top = bottom + height;
             this.nearPlane = nearPlane;
             this.farPlane = farPlane;
-            viewIsDirty = true;
-            projectionIsDirty = true;
+            viewDirty = true;
+            projectionDirty = true;
         }
 
         public override void Zoom(float amount)
@@ -1169,7 +1169,7 @@ namespace WM.Framework.Monogame
             left /= amount;
             right /= amount;
             bottom /= amount;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
@@ -1181,7 +1181,7 @@ namespace WM.Framework.Monogame
             left = -left;
             right = -right;
             bottom = -bottom;
-            projectionIsDirty = true;
+            projectionDirty = true;
         }
 
         /// <summary>
