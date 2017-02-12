@@ -6,8 +6,9 @@ namespace WM.Framework.Monogame
     {
         protected Vector3 position, scaling;
         protected Matrix rotation;
-        protected Matrix world;
+        protected Matrix world, worldInv;
         protected bool worldDirty;
+        protected bool worldInvDirty;
 
         public Vector3 Position
         {
@@ -57,6 +58,19 @@ namespace WM.Framework.Monogame
                 }
 
                 return world;
+            }
+        }
+        public Matrix WorldInverse
+        {
+            get
+            {
+                if (worldInvDirty)
+                {
+                    worldInv = Matrix.Invert(world);
+                    worldInvDirty = false;
+                }
+
+                return worldInv;
             }
         }
 
